@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HW09 - MI Parameter Estimation Checklist</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        h1 {
+            color: #64ffda;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #8892b0;
+            font-size: 0.95em;
+        }
+        .model-formula {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #64ffda;
+        }
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 25px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #64ffda, #00bcd4);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+        .section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .section-number {
+            background: linear-gradient(135deg, #64ffda, #00bcd4);
+            color: #1a1a2e;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .section-title {
+            color: #ccd6f6;
+            font-size: 1.2em;
+            flex-grow: 1;
+        }
+        .section-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .status-in-progress { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+        .status-complete { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .task-list {
+            list-style: none;
+            padding-left: 45px;
+        }
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            border: 2px solid #64ffda;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .checkbox:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
+        .checkbox.checked {
+            background: #64ffda;
+        }
+        .checkbox.checked::after {
+            content: '✓';
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        .task-text {
+            flex-grow: 1;
+            line-height: 1.5;
+        }
+        .task-text.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        .code-note {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            margin-top: 5px;
+            color: #64ffda;
+        }
+        .warning-note {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 3px solid #ffc107;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 5px 5px 0;
+            font-size: 0.9em;
+        }
+        .info-note {
+            background: rgba(33, 150, 243, 0.1);
+            border-left: 3px solid #2196f3;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 5px 5px 0;
+            font-size: 0.9em;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .results-table th, .results-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .results-table th {
+            background: rgba(100, 255, 218, 0.1);
+            color: #64ffda;
+        }
+        .results-table input {
+            width: 80px;
+            padding: 5px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            color: #e0e0e0;
+            text-align: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #64ffda, #00bcd4);
+            color: #1a1a2e;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(100, 255, 218, 0.3);
+        }
+        .footer-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .current-step {
+            border: 2px solid #64ffda;
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.2);
+        }
+        .data-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .data-card {
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .data-card-value {
+            font-size: 1.3em;
+            color: #64ffda;
+            font-weight: bold;
+        }
+        .data-card-label {
+            font-size: 0.8em;
+            color: #8892b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 HW09: MI Parameter Estimation</h1>
+            <p class="subtitle">Algorithmic Trading - Robert Kissell, Ph.D.</p>
+            <div class="model-formula">
+                <strong>I-Star Model:</strong><br>
+                MI<sub>bp</sub> = (a₁ · Size<sup>a₂</sup> · σ<sup>a₃</sup>) · (b₁ · POV<sup>a₄</sup> + (1 - b₁))
+            </div>
+            <div class="data-info">
+                <div class="data-card">
+                    <div class="data-card-value">295,947</div>
+                    <div class="data-card-label">Observations</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-value">0.05</div>
+                    <div class="data-card-label">Iteration Increment</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-value">5</div>
+                    <div class="data-card-label">Parameters</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-value" id="completion-rate">0%</div>
+                    <div class="data-card-label">Completion</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill">0%</div>
+        </div>
+
+        <!-- Section 1: Log-Linear Regression -->
+        <div class="section current-step" id="section-1">
+            <div class="section-header" onclick="toggleSection(1)">
+                <div class="section-number">1</div>
+                <div class="section-title">Log-Linear Regression (Simplified)</div>
+                <span class="section-status status-pending" id="status-1">Pending</span>
+            </div>
+            <div class="info-note">
+                <strong>Method:</strong> Transform the non-linear equation using logarithms, solve via OLS.<br>
+                <strong>Assumption:</strong> b₁ = 1 (simplified model)
+            </div>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Load data file (MIData-Algo-01.csv)
+                        <div class="code-note">MIData = pd.read_csv('MIData-Algo-01.csv')</div>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Transform variables: X = ln(Size, Volatility, POV), Y = ln(Cost)
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Run OLS regression with constant
+                        <div class="code-note">model = sm.OLS(Y, X).fit()</div>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Extract coefficients: a₂, a₃, a₄ from regression; a₁ = exp(const + 0.5·MSE_log)
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Set b₁ = 1 (simplified assumption)
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Calculate MSE and SE using full I-Star model formula
+                        <div class="code-note">EstCost = (a1*Size**a2*Volatility**a3)*(b1*POV**a4+(1-b1))<br>
+                        MSE = np.mean((Cost - EstCost)**2); SE = MSE**0.5</div>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Record results in table below
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Iterative Log-Linear Regression -->
+        <div class="section" id="section-2">
+            <div class="section-header" onclick="toggleSection(2)">
+                <div class="section-number">2</div>
+                <div class="section-title">Iterative Log-Linear Regression</div>
+                <span class="section-status status-pending" id="status-2">Pending</span>
+            </div>
+            <div class="warning-note">
+                <strong>⚠️ Note:</strong> Using increment of 0.05 (not 0.001) for reasonable runtime.<br>
+                Grid: b₁ ∈ [0.50, 1.00], a₄ ∈ [0.10, 1.50]
+            </div>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Set up iteration ranges: b₁ from 0.50 to 1.00, a₄ from 0.10 to 1.50 (increment 0.05)
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        For each (b₁, a₄) pair: Calculate Y_adj = ln(Cost / (b₁·POV^a₄ + (1-b₁)))
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Run OLS on Y_adj vs ln(Size), ln(Volatility) to get a₁, a₂, a₃
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Calculate SE for each iteration using full I-Star model
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Store all iteration results
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        <strong>Select results with smallest SE</strong>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Record best parameters in table below
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Non-Linear Regression -->
+        <div class="section" id="section-3">
+            <div class="section-header" onclick="toggleSection(3)">
+                <div class="section-number">3</div>
+                <div class="section-title">Non-Linear Regression (NLS)</div>
+                <span class="section-status status-pending" id="status-3">Pending</span>
+            </div>
+            <div class="info-note">
+                <strong>Method:</strong> Minimize SSE directly using scipy.optimize.minimize<br>
+                <strong>Bounds:</strong> a₁ ∈ [0, 2000], a₂,a₃,a₄ ∈ [0, 2], b₁ ∈ [0, 1]
+            </div>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Define objective function: MI_NonLinearOLS returning SSE
+                        <div class="code-note">SSE = Σ(Cost - EstCost)²</div>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Set initial guesses: a₁=1000, a₂=0.5, a₃=0.5, a₄=0.5, b₁=0.95
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Set parameter bounds (LB, UB)
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Run scipy.optimize.minimize with bounds
+                        <div class="code-note">results = minimize(MI_NonLinearOLS, initial_guess, bounds=MyBounds, args=(...))</div>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Verify convergence (results.success == True)
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Calculate MSE and SE from optimized parameters
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Record results in table below
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 4: Results Summary -->
+        <div class="section" id="section-4">
+            <div class="section-header" onclick="toggleSection(4)">
+                <div class="section-number">4</div>
+                <div class="section-title">Results Summary Table</div>
+                <span class="section-status status-pending" id="status-4">Pending</span>
+            </div>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>a₁</th>
+                        <th>a₂</th>
+                        <th>a₃</th>
+                        <th>a₄</th>
+                        <th>b₁</th>
+                        <th>MSE</th>
+                        <th>SE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Log-Linear</strong></td>
+                        <td><input type="text" id="ll-a1" placeholder="--"></td>
+                        <td><input type="text" id="ll-a2" placeholder="--"></td>
+                        <td><input type="text" id="ll-a3" placeholder="--"></td>
+                        <td><input type="text" id="ll-a4" placeholder="--"></td>
+                        <td><input type="text" id="ll-b1" placeholder="--"></td>
+                        <td><input type="text" id="ll-mse" placeholder="--"></td>
+                        <td><input type="text" id="ll-se" placeholder="--"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Iterative</strong></td>
+                        <td><input type="text" id="it-a1" placeholder="--"></td>
+                        <td><input type="text" id="it-a2" placeholder="--"></td>
+                        <td><input type="text" id="it-a3" placeholder="--"></td>
+                        <td><input type="text" id="it-a4" placeholder="--"></td>
+                        <td><input type="text" id="it-b1" placeholder="--"></td>
+                        <td><input type="text" id="it-mse" placeholder="--"></td>
+                        <td><input type="text" id="it-se" placeholder="--"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Non-Linear</strong></td>
+                        <td><input type="text" id="nl-a1" placeholder="--"></td>
+                        <td><input type="text" id="nl-a2" placeholder="--"></td>
+                        <td><input type="text" id="nl-a3" placeholder="--"></td>
+                        <td><input type="text" id="nl-a4" placeholder="--"></td>
+                        <td><input type="text" id="nl-b1" placeholder="--"></td>
+                        <td><input type="text" id="nl-mse" placeholder="--"></td>
+                        <td><input type="text" id="nl-se" placeholder="--"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul class="task-list" style="margin-top: 20px;">
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        All three models completed and recorded
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-text">
+                        Verify results are reasonable (compare to expected ranges from slides)
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+            <button class="btn btn-primary" onclick="saveProgress()">💾 Save Progress</button>
+            <button class="btn btn-secondary" onclick="loadProgress()">📂 Load Progress</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleTask(checkbox) {
+            checkbox.classList.toggle('checked');
+            const taskText = checkbox.nextElementSibling;
+            taskText.classList.toggle('completed');
+            updateProgress();
+            updateSectionStatus();
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.checkbox').length;
+            const checked = document.querySelectorAll('.checkbox.checked').length;
+            const percent = Math.round((checked / total) * 100);
+            
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('progress-fill').textContent = percent + '%';
+            document.getElementById('completion-rate').textContent = percent + '%';
+        }
+
+        function updateSectionStatus() {
+            for (let i = 1; i <= 4; i++) {
+                const section = document.getElementById('section-' + i);
+                const checkboxes = section.querySelectorAll('.checkbox');
+                const checked = section.querySelectorAll('.checkbox.checked');
+                const status = document.getElementById('status-' + i);
+                
+                if (checked.length === 0) {
+                    status.className = 'section-status status-pending';
+                    status.textContent = 'Pending';
+                } else if (checked.length === checkboxes.length) {
+                    status.className = 'section-status status-complete';
+                    status.textContent = 'Complete';
+                    section.classList.remove('current-step');
+                    // Set next section as current
+                    const nextSection = document.getElementById('section-' + (i + 1));
+                    if (nextSection && !nextSection.querySelector('.checkbox.checked')) {
+                        nextSection.classList.add('current-step');
+                    }
+                } else {
+                    status.className = 'section-status status-in-progress';
+                    status.textContent = 'In Progress';
+                    section.classList.add('current-step');
+                }
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all progress? This cannot be undone.')) {
+                document.querySelectorAll('.checkbox').forEach(cb => {
+                    cb.classList.remove('checked');
+                });
+                document.querySelectorAll('.task-text').forEach(tt => {
+                    tt.classList.remove('completed');
+                });
+                document.querySelectorAll('.results-table input').forEach(inp => {
+                    inp.value = '';
+                });
+                updateProgress();
+                updateSectionStatus();
+                document.getElementById('section-1').classList.add('current-step');
+            }
+        }
+
+        function saveProgress() {
+            const data = {
+                checkboxes: [],
+                inputs: {}
+            };
+            document.querySelectorAll('.checkbox').forEach((cb, i) => {
+                data.checkboxes[i] = cb.classList.contains('checked');
+            });
+            document.querySelectorAll('.results-table input').forEach(inp => {
+                data.inputs[inp.id] = inp.value;
+            });
+            localStorage.setItem('mi_estimation_progress', JSON.stringify(data));
+            alert('Progress saved!');
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('mi_estimation_progress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.querySelectorAll('.checkbox').forEach((cb, i) => {
+                    if (data.checkboxes[i]) {
+                        cb.classList.add('checked');
+                        cb.nextElementSibling.classList.add('completed');
+                    }
+                });
+                for (const [id, value] of Object.entries(data.inputs)) {
+                    const inp = document.getElementById(id);
+                    if (inp) inp.value = value;
+                }
+                updateProgress();
+                updateSectionStatus();
+                alert('Progress loaded!');
+            } else {
+                alert('No saved progress found.');
+            }
+        }
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>
